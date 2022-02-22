@@ -2,7 +2,7 @@ use crate::value::print_value;
 use crate::{Chunk, OpCode};
 
 impl Chunk {
-    pub fn disassemble(&self, name: &str) {
+    pub fn _disassemble(&self, name: &str) {
         println!("== {} ==", name);
 
         let mut offset = 0;
@@ -11,7 +11,7 @@ impl Chunk {
         }
     }
 
-    fn disassemble_instruction(&self, offset: usize) -> usize {
+    pub fn disassemble_instruction(&self, offset: usize) -> usize {
         print!("{:04} ", offset);
 
         if offset > 0 && self.lines[offset] == self.lines[offset - 1] {
@@ -24,6 +24,11 @@ impl Chunk {
 
         match instruction.try_into() {
             Ok(OpCode::Constant) => self.constant_instruction("OP_CONSTANT", offset),
+            Ok(OpCode::Add) => Self::simple_instruction("OP_ADD", offset),
+            Ok(OpCode::Subtract) => Self::simple_instruction("OP_SUBTRACT", offset),
+            Ok(OpCode::Multiply) => Self::simple_instruction("OP_MULTIPLY", offset),
+            Ok(OpCode::Divide) => Self::simple_instruction("OP_DIVIDE", offset),
+            Ok(OpCode::Negate) => Self::simple_instruction("OP_NEGATE", offset),
             Ok(OpCode::Return) => Self::simple_instruction("OP_RETURN", offset),
             _ => {
                 println!("Unrecognized instruction {}", instruction);
