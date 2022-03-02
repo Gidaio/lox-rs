@@ -1,7 +1,8 @@
+use crate::chunk::Chunk;
+use crate::compiler::compile;
+use crate::opcode::OpCode;
 use crate::value::print_value;
 use crate::value::Value;
-use crate::Chunk;
-use crate::OpCode;
 
 const DEBUG_TRACE_EXECUTION: bool = true;
 
@@ -26,10 +27,9 @@ impl VM {
         }
     }
 
-    pub fn interpret(&mut self, chunk: Chunk) -> InterpretResult {
-        self.chunk = Some(chunk);
-        self.ip = 0;
-        self.run()
+    pub fn interpret(&mut self, source: String) -> InterpretResult {
+        compile(source);
+        InterpretResult::Ok
     }
 
     pub fn run(&mut self) -> InterpretResult {

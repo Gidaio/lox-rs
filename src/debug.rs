@@ -1,5 +1,6 @@
+use crate::chunk::Chunk;
+use crate::opcode::OpCode;
 use crate::value::print_value;
-use crate::{Chunk, OpCode};
 
 impl Chunk {
     pub fn _disassemble(&self, name: &str) {

@@ -1,36 +1,66 @@
 mod chunk;
+mod compiler;
 mod debug;
 mod opcode;
+mod scanner;
 mod value;
 mod vm;
 
-use chunk::Chunk;
-use opcode::OpCode;
-use vm::VM;
+use std::io::{Read, Write};
+use std::process::exit;
+use text_io::read;
+use vm::{InterpretResult, VM};
 
 fn main() {
+    let args: Vec<String> = std::env::args().collect();
+
+    if args.len() == 1 {
+        repl();
+    } else if args.len() == 2 {
+        run_file(&args[1]);
+    } else {
+        println!("Usage: clox [path]");
+        exit(64);
+    }
+}
+
+fn repl() {
     let mut vm = VM::init();
-    let mut chunk = Chunk::init();
 
-    let constant_index = chunk.add_constant(1.2);
-    chunk.write_opcode(OpCode::Constant, 123);
-    chunk.write_byte(constant_index as u8, 123);
+    loop {
+        print!("> ");
+        std::io::stdout()
+            .flush()
+            .expect("Woah. Somehow flushing stdout failed.");
+        let input: String = read!("{}\n");
+        vm.interpret(input);
+    }
+}
 
-    let constant_index = chunk.add_constant(3.4);
-    chunk.write_opcode(OpCode::Constant, 123);
-    chunk.write_byte(constant_index as u8, 123);
+fn run_file(path: &str) {
+    let source = read_file(path);
+    let mut vm = VM::init();
+    let result = vm.interpret(source);
 
-    chunk.write_opcode(OpCode::Add, 123);
+    match result {
+        InterpretResult::Ok => (),
+        InterpretResult::CompileError => exit(65),
+        InterpretResult::RuntimeError => exit(70),
+    }
+}
 
-    let constant_index = chunk.add_constant(5.6);
-    chunk.write_opcode(OpCode::Constant, 123);
-    chunk.write_byte(constant_index as u8, 123);
+fn read_file(path: &str) -> String {
+    let mut source = String::new();
+    let mut file = if let Ok(file) = std::fs::File::open(path) {
+        file
+    } else {
+        println!("Couldn't open file \"{}\".", path);
+        exit(74);
+    };
+    if let Err(_) = file.read_to_string(&mut source) {
+        println!("Hey! The file you gave me isn't text!");
+        exit(74);
+    };
 
-    chunk.write_opcode(OpCode::Divide, 123);
-
-    chunk.write_opcode(OpCode::Negate, 123);
-
-    chunk.write_opcode(OpCode::Return, 123);
-
-    vm.interpret(chunk);
+    source
 }

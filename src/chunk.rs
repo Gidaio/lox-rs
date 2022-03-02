@@ -1,5 +1,5 @@
+use crate::opcode::OpCode;
 use crate::value::Value;
-use crate::OpCode;
 
 pub struct Chunk {
     pub code: Vec<u8>,
