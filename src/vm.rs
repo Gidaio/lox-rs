@@ -1,5 +1,5 @@
 use crate::chunk::Chunk;
-use crate::compiler::compile;
+use crate::compiler::Parser;
 use crate::opcode::OpCode;
 use crate::value::print_value;
 use crate::value::Value;
@@ -27,8 +27,9 @@ impl VM {
         }
     }
 
-    pub fn interpret(&mut self, source: String) -> InterpretResult {
-        compile(source);
+    pub fn interpret(source: String) -> InterpretResult {
+        let mut parser = Parser::init(source);
+        parser.compile();
         InterpretResult::Ok
     }
 

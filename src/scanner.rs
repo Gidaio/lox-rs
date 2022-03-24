@@ -47,10 +47,10 @@ pub enum TokenType {
     EOF,
 }
 
-pub struct Token<'a> {
+pub struct Token<'source> {
     pub token_type: TokenType,
     pub line: usize,
-    pub token: &'a str,
+    pub token: &'source str,
 }
 
 pub struct Scanner {
@@ -124,7 +124,7 @@ impl Scanner {
         }
     }
 
-    fn error_token<'a>(&self, message: &'a str) -> Token<'a> {
+    fn error_token<'source>(&self, message: &'source str) -> Token<'source> {
         Token {
             token_type: TokenType::Error,
             line: self.line,

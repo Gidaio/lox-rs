@@ -25,7 +25,7 @@ fn main() {
 }
 
 fn repl() {
-    let mut vm = VM::init();
+    // let mut vm = VM::init();
 
     loop {
         print!("> ");
@@ -33,14 +33,14 @@ fn repl() {
             .flush()
             .expect("Woah. Somehow flushing stdout failed.");
         let input: String = read!("{}\n");
-        vm.interpret(input);
+        VM::interpret(input);
     }
 }
 
 fn run_file(path: &str) {
     let source = read_file(path);
-    let mut vm = VM::init();
-    let result = vm.interpret(source);
+    // let mut vm = VM::init();
+    let result = VM::interpret(source);
 
     match result {
         InterpretResult::Ok => (),
