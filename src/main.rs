@@ -1,44 +1,64 @@
+extern crate text_io;
+
 mod chunk;
 mod common;
+mod compiler;
 mod debug;
+mod scanner;
 mod value;
 mod vm;
 
 mod prelude {
     pub use crate::chunk::*;
     pub use crate::common::*;
+    pub use crate::compiler::*;
     pub use crate::debug::*;
+    pub use crate::scanner::*;
     pub use crate::value::*;
     pub use crate::vm::*;
 }
 
 use prelude::*;
+use std::env;
+use std::fs;
+use std::io::{stdout, Write};
+use std::process;
+use text_io::read;
+
+fn repl() {
+    let mut vm = init_vm();
+    loop {
+        print!("> ");
+        stdout().flush().expect("Failed to flush stdout.");
+        let line: String = read!("{}\n");
+
+        interpret(&mut vm, &line);
+    }
+
+    // free_vm(vm);
+}
+
+fn run_file(path: &str) {
+    let mut vm = init_vm();
+    let source = fs::read_to_string(path).expect("Couldn't read file.");
+    let result = interpret(&mut vm, &source);
+    free_vm(vm);
+
+    match result {
+        InterpretResult::Ok => process::exit(0),
+        InterpretResult::CompileError => process::exit(65),
+        InterpretResult::RuntimeError => process::exit(70),
+    }
+}
 
 fn main() {
-    let mut vm = init_vm();
-    let mut chunk = init_chunk();
-
-    let constant = add_constant(&mut chunk, 1.2);
-    write_chunk(&mut chunk, OP_CONSTANT, 123);
-    write_chunk(&mut chunk, constant as u8, 123);
-
-    let constant = add_constant(&mut chunk, 3.4);
-    write_chunk(&mut chunk, OP_CONSTANT, 123);
-    write_chunk(&mut chunk, constant as u8, 123);
-
-    write_chunk(&mut chunk, OP_ADD, 123);
-
-    let constant = add_constant(&mut chunk, 5.6);
-    write_chunk(&mut chunk, OP_CONSTANT, 123);
-    write_chunk(&mut chunk, constant as u8, 123);
-
-    write_chunk(&mut chunk, OP_DIVIDE, 123);
-    write_chunk(&mut chunk, OP_NEGATE, 123);
-    write_chunk(&mut chunk, OP_RETURN, 123);
-
-    disassemble_chunk(&mut chunk, "test chunk");
-    interpret(&mut vm, &mut chunk);
-
-    free_vm(vm);
-    free_chunk(chunk);
+    let args: Vec<String> = env::args().collect();
+    if args.len() == 1 {
+        repl();
+    } else if args.len() == 2 {
+        run_file(&args[1]);
+    } else {
+        eprintln!("Usage: lox-rs [path]");
+        process::exit(64);
+    }
 }

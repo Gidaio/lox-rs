@@ -23,10 +23,9 @@ pub fn free_vm(_vm: VM) {
     // Just take it and don't let it go.
 }
 
-pub fn interpret<'chunk>(vm: &mut VM<'chunk>, chunk: &'chunk mut Chunk) -> InterpretResult {
-    vm.chunk = Some(chunk);
-    vm.ip = 0;
-    run(vm)
+pub fn interpret<'chunk>(_vm: &mut VM<'chunk>, source: &str) -> InterpretResult {
+    compile(source);
+    InterpretResult::Ok
 }
 
 fn run(vm: &mut VM) -> InterpretResult {
@@ -52,31 +51,31 @@ fn run(vm: &mut VM) -> InterpretResult {
                     vm.stack.push(constant);
                 }
                 OP_ADD => {
-                    let b = vm.stack.pop().unwrap();
-                    let a = vm.stack.pop().unwrap();
+                    let b = vm.stack.pop().expect("Tried to pop an empty stack.");
+                    let a = vm.stack.pop().expect("Tried to pop an empty stack.");
                     vm.stack.push(a + b);
                 }
                 OP_SUBTRACT => {
-                    let b = vm.stack.pop().unwrap();
-                    let a = vm.stack.pop().unwrap();
+                    let b = vm.stack.pop().expect("Tried to pop an empty stack.");
+                    let a = vm.stack.pop().expect("Tried to pop an empty stack.");
                     vm.stack.push(a - b);
                 }
                 OP_MULTIPLY => {
-                    let b = vm.stack.pop().unwrap();
-                    let a = vm.stack.pop().unwrap();
+                    let b = vm.stack.pop().expect("Tried to pop an empty stack.");
+                    let a = vm.stack.pop().expect("Tried to pop an empty stack.");
                     vm.stack.push(a * b);
                 }
                 OP_DIVIDE => {
-                    let b = vm.stack.pop().unwrap();
-                    let a = vm.stack.pop().unwrap();
+                    let b = vm.stack.pop().expect("Tried to pop an empty stack.");
+                    let a = vm.stack.pop().expect("Tried to pop an empty stack.");
                     vm.stack.push(a / b);
                 }
                 OP_NEGATE => {
-                    let value = vm.stack.pop().unwrap();
+                    let value = vm.stack.pop().expect("Tried to pop an empty stack.");
                     vm.stack.push(-value);
                 }
                 OP_RETURN => {
-                    print_value(vm.stack.pop().unwrap());
+                    print_value(vm.stack.pop().expect("Tried to pop an empty stack."));
                     println!("");
                     return InterpretResult::Ok;
                 }
