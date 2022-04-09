@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
-pub struct VM<'chunk> {
-    chunk: Option<&'chunk mut Chunk>,
+pub struct VM {
+    chunk: Option<Chunk>,
     ip: usize,
     stack: Vec<Value>,
 }
@@ -12,7 +12,7 @@ pub enum InterpretResult {
     RuntimeError,
 }
 
-pub fn init_vm<'chunk>() -> VM<'chunk> {
+pub fn init_vm() -> VM {
     VM {
         chunk: None,
         ip: 0,
@@ -23,13 +23,22 @@ pub fn free_vm(_vm: VM) {
     // Just take it and don't let it go.
 }
 
-pub fn interpret<'chunk>(_vm: &mut VM<'chunk>, source: &str) -> InterpretResult {
-    compile(source);
-    InterpretResult::Ok
+pub fn interpret(vm: &mut VM, source: &str) -> InterpretResult {
+    let mut chunk = init_chunk();
+
+    if !compile(source, &mut chunk) {
+        free_chunk(chunk);
+        InterpretResult::CompileError
+    } else {
+        vm.chunk = Some(chunk);
+        vm.ip = 0;
+
+        run(vm)
+    }
 }
 
 fn run(vm: &mut VM) -> InterpretResult {
-    if let Some(chunk) = vm.chunk.as_mut() {
+    if let Some(ref mut chunk) = vm.chunk {
         loop {
             if DEBUG_TRACE_EXECUTION {
                 print!("          ");

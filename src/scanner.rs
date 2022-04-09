@@ -5,9 +5,10 @@ pub struct Scanner<'source> {
     line: usize,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
+#[repr(usize)]
 pub enum TokenType {
-    LeftParen,
+    LeftParen = 0,
     RightParen,
     LeftBrace,
     RightBrace,
@@ -53,6 +54,7 @@ pub enum TokenType {
     EoF,
 }
 
+#[derive(Clone)]
 pub struct Token<'source> {
     pub token_type: TokenType,
     pub line: usize,
@@ -90,11 +92,7 @@ fn advance(scanner: &mut Scanner) -> char {
 }
 
 fn peek(scanner: &Scanner) -> char {
-    scanner
-        .source
-        .chars()
-        .nth(scanner.current)
-        .unwrap_or('\0')
+    scanner.source.chars().nth(scanner.current).unwrap_or('\0')
 }
 
 fn peek_next(scanner: &Scanner) -> char {
